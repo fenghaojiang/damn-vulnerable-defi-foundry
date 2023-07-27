@@ -10,7 +10,7 @@ import {FreeRiderNFTMarketplace} from "../free-rider/FreeRiderNFTMarketplace.sol
 import {WETH9} from "../WETH9.sol";
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 
-contract AttackFreeRider {
+contract AttackFreeRider is IERC721Receiver {
     using Address for address;
 
     address _owner;
