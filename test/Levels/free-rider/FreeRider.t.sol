@@ -145,14 +145,15 @@ contract FreeRider is Test {
         console.log("buyer address:", address(buyer));
         console.log("weth address:", address(weth));
 
-        vm.startPrank(attacker);
-
+        vm.startBroadcast(attacker);
+        // vm.startPrank(attacker);
         AttackFreeRider attackContract = new AttackFreeRider(attacker, address(damnValuableNFT), 
         address(uniswapV2Router), address(uniswapV2Pair), payable(freeRiderNFTMarketplace), address(freeRiderBuyer), payable(weth));
 
         attackContract.flashloan(address(weth), 15 ether);
 
-        vm.stopPrank();
+        vm.stopBroadcast();
+        // vm.stopPrank();
 
         console.log("buyer balance:", damnValuableNFT.balanceOf(address(freeRiderBuyer)));
 

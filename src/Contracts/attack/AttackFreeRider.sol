@@ -83,6 +83,8 @@ contract AttackFreeRider is IERC721Receiver {
         _weth.deposit{value: 15.1 ether}();
 
         IERC20(tokenBorrow).transfer(address(_pair), amountToRepay);
+
+        console.log("tx origin:", tx.origin);
     }
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
